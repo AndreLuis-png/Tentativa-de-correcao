@@ -3,154 +3,197 @@
 <head>
     <link rel="icon" type="image/jpg" href="/static/çenay.jpg">
     <meta charset="UTF-8">
-    <title>Painel Administrativo</title>
+    <title>Painel Administrativo - Seguro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        input[type="text"], datalist option {
+        #admin-page-wrapper {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            color: #334155;
+            box-sizing: border-box;
+        }
+        .admin-section-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        .admin-card-cadastro {
+            background: #1e293b !important;
+            color: white !important;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 35px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .admin-form-group {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .admin-input-field {
+            padding: 10px !important;
+            border-radius: 4px !important;
+            border: 1px solid #cbd5e1 !important;
+            background: white !important;
+            color: #334155 !important;
+            min-width: 200px;
             text-transform: none !important;
         }
-        .btn-admin-green {
-            background-color: #10b981 !important;
+        .admin-btn-submit {
+            background-color: #0284c7 !important;
             color: white !important;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 4px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            transition: background 0.2s;
         }
-        .btn-admin-green:hover {
-            background-color: #059669 !important;
+        .admin-btn-submit:hover {
+            background-color: #0369a1 !important;
+        }
+        .admin-table-container {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            margin-bottom: 40px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+            background: white !important;
+        }
+        .admin-custom-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            margin: 0 !important;
+            text-align: left !important;
+        }
+        .admin-custom-table th {
+            background: #334155 !important;
+            color: white !important;
+            padding: 14px !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+        }
+        .admin-custom-table td {
+            padding: 12px 14px !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            font-size: 14px !important;
+            color: #334155 !important;
+            text-transform: none !important;
+        }
+        .admin-custom-table tr:hover {
+            background-color: #f8fafc !important;
+        }
+        .admin-status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-cor-ativo { 
+            background-color: #dcfce7 !important; 
+            color: #15803d !important; 
+        }
+        .status-cor-bloqueado { 
+            background-color: #fee2e2 !important; 
+            color: #b91c1c !important; 
+        }
+        .admin-select-selector {
+            padding: 6px !important;
+            border-radius: 4px !important;
+            border: 1px solid #cbd5e1 !important;
+            cursor: pointer !important;
+            background: white !important;
+        }
+        .admin-logs-scroll {
+            max-height: 400px !important;
+            overflow-y: auto !important;
         }
     </style>
 </head>
 <body>
-    <header class="admin-header">
-        <h1>Painel do Almoxarifado — Módulo Admin</h1>
-        <p>Administrador: <strong>{{ session['usuario'] }}</strong></p>
+    <header>
+        <h1>Painel do Almoxarifado</h1>
+        <p>Operador: <strong>{{ session['usuario'] }}</strong></p>
         <nav>
             <a href="{{ url_for('lobby') }}">🔎 Consultar Estoque</a> 
             <a href="{{ url_for('insercao') }}">📥 Entrada de Material</a> 
             <a href="{{ url_for('retirada') }}">📤 Saída / Baixa</a> 
-            <a href="{{ url_for('admin_panel') }}" class="active">🛠️ Administração</a>
+            <a href="{{ url_for('admin_panel') }}" class="active" style="color:#f87171;">🛠️ Administração</a>
             <a href="{{ url_for('logout') }}" style="margin-left: auto; background: rgba(239,68,68,0.2);">Sair</a>
         </nav>
     </header>
 
-    <div class="container">
-        <h2>Controle Geral de Utilizadores e Auditoria</h2>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, msg in messages %}
-              <div class="flash-message {% if category == 'success' %}flash-success{% else %}flash-error{% endif %}">
-                {{ msg }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <div class="admin-grid-layout">
-            
-            <div class="admin-forms-column">
+    <div id="admin-page-wrapper">
+        <h2 class="admin-section-title">🛠️ Painel de Administração Geral</h2>
+        
+        <div class="admin-card-cadastro">
+            <h3 style="margin-top:0; margin-bottom: 15px; font-size: 18px;">Cadastrar Novo Operador / Usuário</h3>
+            <form method="POST" class="admin-form-group">
+                <input type="hidden" name="action" value="create_user">
                 
-                <div class="card-admin">
-                    <h3>Gerenciar Funcionários Existentes</h3>
-                    <form method="POST">
-                        <label>Selecione ou Digite o Usuário:</label>
-                        <input type="text" name="funcionario" list="usuarios-existentes" required placeholder="Procure pelo login do operador..." autocomplete="off">
-                        <small style="color: #64748b; display:block; margin-top: 2px; margin-bottom: 15px;">💡 Use a lista suspensa ou digite o nome completo.</small>
-                        
-                        <datalist id="usuarios-existentes">
-                            {% for user in usuarios %}
-                                <option value="{{ user.login }}">
-                            {% endfor %}
-                        </datalist>
-
-                        <label>Nova Senha (Apenas se for alterar):</label>
-                        <input type="password" name="nova_senha" placeholder="Digite uma nova senha se aplicável...">
-
-                        <div class="lock-parameters-box">
-                            <label class="lock-title">⏱️ Parâmetros para Restrição Temporária:</label>
-                            <input type="text" name="tempo_bloqueio" placeholder="Ex: 5 dias, 24 horas, Até segunda-feira...">
-                            <small class="lock-subtitle">Este período será registrado nos logs de auditoria do sistema.</small>
-                        </div>
-
-                        <label>Chave de Verificação Secundária (Mestra):</label>
-                        <input type="password" name="verificacao_seguranca" required placeholder="Digite a chave para autorizar a alteração...">
-
-                        <div class="admin-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <button type="submit" name="acao" value="alterar_dados" class="btn-admin-blue">Atualizar Dados</button>
-                            <button type="submit" name="acao" value="restringir_temp" class="btn-admin-orange">Bloqueio Temp.</button>
-                            <button type="submit" name="acao" value="desbloquear" class="btn-admin-green">🟢 Reativar / Desbloquear</button>
-                            <button type="submit" name="acao" value="excluir" class="btn-admin-red" onclick="return confirm('Tem certeza absoluta que deseja EXCLUIR este usuário permanentemente do banco de dados?');">Excluir Usuário</button>
-                        </div>
-                    </form>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px; color:#cbd5e1;">Nome de Usuário (Login):</label>
+                    <input type="text" name="novo_usuario" class="admin-input-field" placeholder="Ex: joao.silva" required autocomplete="off">
+                </div>
+                
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px; color:#cbd5e1;">Senha de Acesso:</label>
+                    <input type="password" name="nova_senha" class="admin-input-field" placeholder="Digite a senha" required>
                 </div>
 
-                <div class="card-admin" style="margin-top: 25px;">
-                    <h3>Cadastrar Novo Utilizador</h3>
-                    <form method="POST">
-                        <input type="hidden" name="acao" value="cadastrar">
-                        
-                        <label>Nome do Funcionário (Login):</label>
-                        <input type="text" name="funcionario" required placeholder="Ex: joao.silva">
-
-                        <label>Senha Provisória:</label>
-                        <input type="password" name="nova_senha" required placeholder="Digite a senha inicial...">
-
-                        <label>Nível de Permissão:</label>
-                        <select name="tipo_permissao">
-                            <option value="user">Operador Comum (user)</option>
-                            <option value="admin">Administrador Geral (admin)</option>
-                        </select>
-
-                        <label>Chave de Verificação Secundária (Mestra):</label>
-                        <input type="password" name="verificacao_seguranca" required placeholder="Digite a chave master para autorizar...">
-
-                        <button type="submit" class="admin-action-btn" style="width: 100%;">Criar Perfil no Sistema</button>
-                    </form>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <label style="font-size:13px; color:#cbd5e1;">Cargo / Nível:</label>
+                    <select name="role" class="admin-input-field" style="min-width: 150px;">
+                        <option value="user">Operador Comum</option>
+                        <option value="admin">Administrador</option>
+                    </select>
                 </div>
-            </div>
 
-            <div class="admin-logs-column">
-                <div class="card-admin text-logs-container">
-                    <h3>Histórico de Logs de Auditoria</h3>
-                    <div class="logs-scroll-box">
-                        {% for log in historico %}
-                            <div class="log-item-line">
-                                <span class="log-meta">[{{ log.data_registro }}] <strong>{{ log.usuario }}</strong> realizou <u>{{ log.acao }}</u>:</span>
-                                <p class="log-detail-text">{{ log.detalhe }}</p>
-                            </div>
-                        {% else %}
-                            <p style="color: var(--gray-muted); text-align: center; font-style: italic; padding: 20px;">Nenhum registo de atividade encontrado.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
+                <button type="submit" class="admin-btn-submit">Criar Conta</button>
+            </form>
         </div>
 
-        <div class="card-admin" style="margin-top: 30px;">
-            <h3>📋 Status de Permissão de Operadores</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 15px; background: white;">
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1e293b;">Gerenciamento de Usuários do Sistema</h3>
+        <div class="admin-table-container">
+            <table class="admin-custom-table">
                 <thead>
-                    <tr style="background-color: #f1f5f9; text-align: left;">
-                        <th style="padding: 12px; border-bottom: 2px solid #cbd5e1;">Nome de Usuário (Login)</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #cbd5e1;">Nível de Acesso</th>
-                        <th style="padding: 12px; border-bottom: 2px solid #cbd5e1;">Situação no Banco</th>
+                    <tr>
+                        <th>Usuário (Login)</th>
+                        <th>Nível de Cargo</th>
+                        <th>Status Atual</th>
+                        <th>Ação de Bloqueio</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in usuarios %}
                     <tr>
-                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">{{ user.login }}</td>
-                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;"><code style="background: #f1f5f9; padding: 2px 6px; border-radius:4px;">{{ user.role }}</code></td>
-                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">
+                        <td><strong>{{ user.login }}</strong></td>
+                        <td>{{ 'Administrador' if user.role == 'admin' else 'Operador Comum' }}</td>
+                        <td>
                             {% if user.status == 'ativo' %}
-                                <span style="background-color: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block;">Ativo</span>
+                                <span class="admin-status-badge status-cor-ativo">Ativo</span>
                             {% else %}
-                                <span style="background-color: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; display: inline-block;">Bloqueado / Suspenso</span>
+                                <span class="admin-status-badge status-cor-bloqueado">Suspenso</span>
                             {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" style="margin:0; padding:0;">
+                                <input type="hidden" name="usuario_alvo" value="{{ user.login }}">
+                                {% if user.status == 'ativo' %}
+                                    <input type="hidden" name="action" value="suspender">
+                                    <button type="submit" class="admin-btn-submit" style="background-color: #dc2626 !important; padding: 6px 12px !important;">🚫 Suspender</button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="reativar">
+                                    <button type="submit" class="admin-btn-submit" style="background-color: #16a34a !important; padding: 6px 12px !important;">✔ Reativar</button>
+                                {% endif %}
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}
@@ -158,6 +201,33 @@
             </table>
         </div>
 
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1e293b;">📋 Histórico Recente de Logs Auditáveis</h3>
+        <div class="admin-table-container admin-logs-scroll">
+            <table class="admin-custom-table">
+                <thead style="position: sticky; top: 0; z-index: 5;">
+                    <tr>
+                        <th>Data / Hora</th>
+                        <th>Operador</th>
+                        <th>Ação Realizada</th>
+                        <th>Detalhes do Histórico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td style="color:#64748b; font-family: monospace;">{{ log.data_registro }}</td>
+                        <td><strong>{{ log.usuario }}</strong></td>
+                        <td>{{ log.acao }}</td>
+                        <td><code>{{ log.detalhe if log.detalhe else '-' }}</code></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#64748b; padding: 25px;">Nenhum registro de log encontrado no banco de dados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
