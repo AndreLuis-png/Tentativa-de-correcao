@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS historico_logs (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
-INSERT INTO config_admin (chave_secundaria) VALUES ('ROCAMBOLE');
+INSERT INTO config_admin (chave_secundaria) VALUES ('$2a$12$jAGacPYTzdrBwqM9VhgL3e8sLTyECVmxhhdrj3RIwT9sCVW6lK/yW'); #ROCAMBOLE
 
 INSERT INTO usuarios (login, senha, status, role) #senha = admin
 VALUES ('admin', '$2a$12$TyKbVE6G425lA7ko/IgwoOcR.Uc4RCbcvGj/ftZkopSNhhlelM8Zi', 'ativo', 'admin');
