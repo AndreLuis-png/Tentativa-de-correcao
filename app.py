@@ -1,3 +1,4 @@
+#pip install flask flask-mysqldb mysqlclient bcrypt  --Instalar antes de usar o código
 import os
 import re
 import unicodedata
