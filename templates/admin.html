@@ -17,47 +17,82 @@
         .admin-section-title {
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: #1e293b;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 8px;
+            text-align: center;
         }
+        /* Card de Cadastro Centralizado */
         .admin-card-cadastro {
-            background: #1e293b !important;
+            background: #192A6B !important;
             color: white !important;
-            padding: 25px;
-            border-radius: 8px;
-            margin-bottom: 35px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 0 auto 35px auto;
+            max-width: 750px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .admin-card-cadastro h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            width: 100%;
+        }
+        .admin-card-cadastro form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .admin-form-group {
             display: flex;
-            gap: 15px;
-            align-items: flex-end;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
             flex-wrap: wrap;
+            width: 100%;
+        }
+        .admin-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
         }
         .admin-input-field {
-            padding: 10px !important;
-            border-radius: 4px !important;
+            padding: 10px 14px !important;
+            border-radius: 6px !important;
             border: 1px solid #cbd5e1 !important;
             background: white !important;
             color: #334155 !important;
             min-width: 200px;
             text-transform: none !important;
+            text-align: center !important;
+            box-sizing: border-box;
         }
         .admin-btn-submit {
             background-color: #0284c7 !important;
             color: white !important;
             border: none !important;
             padding: 10px 25px !important;
-            border-radius: 4px !important;
+            border-radius: 6px !important;
             font-weight: bold !important;
             cursor: pointer !important;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
+            margin-top: 20px;
+            align-self: center;
         }
         .admin-btn-submit:hover {
             background-color: #0369a1 !important;
+            transform: translateY(-1px);
         }
+        /* Tabelas */
         .admin-table-container {
             border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
@@ -70,7 +105,7 @@
             width: 100% !important;
             border-collapse: collapse !important;
             margin: 0 !important;
-            text-align: left !important;
+            text-align: center !important;
         }
         .admin-custom-table th {
             background: #334155 !important;
@@ -104,13 +139,6 @@
             background-color: #fee2e2 !important; 
             color: #b91c1c !important; 
         }
-        .admin-select-selector {
-            padding: 6px !important;
-            border-radius: 4px !important;
-            border: 1px solid #cbd5e1 !important;
-            cursor: pointer !important;
-            background: white !important;
-        }
         .admin-logs-scroll {
             max-height: 400px !important;
             overflow-y: auto !important;
@@ -134,33 +162,35 @@
         <h2 class="admin-section-title">🛠️ Painel de Administração Geral</h2>
         
         <div class="admin-card-cadastro">
-            <h3 style="margin-top:0; margin-bottom: 15px; font-size: 18px;">Cadastrar Novo Operador / Usuário</h3>
-            <form method="POST" class="admin-form-group">
+            <h3>Cadastrar Novo Operador / Usuário</h3>
+            <form method="POST">
                 <input type="hidden" name="action" value="create_user">
                 
-                <div style="display:flex; flex-direction:column; gap:5px;">
-                    <label style="font-size:13px; color:#cbd5e1;">Nome de Usuário (Login):</label>
-                    <input type="text" name="novo_usuario" class="admin-input-field" placeholder="Ex: joao.silva" required autocomplete="off">
-                </div>
-                
-                <div style="display:flex; flex-direction:column; gap:5px;">
-                    <label style="font-size:13px; color:#cbd5e1;">Senha de Acesso:</label>
-                    <input type="password" name="nova_senha" class="admin-input-field" placeholder="Digite a senha" required>
-                </div>
+                <div class="admin-form-group">
+                    <div class="admin-input-container">
+                        <label style="font-size:13px; color:#cbd5e1;">Nome de Usuário (Login):</label>
+                        <input type="text" name="novo_usuario" class="admin-input-field" placeholder="Ex: joao.silva" required autocomplete="off">
+                    </div>
+                    
+                    <div class="admin-input-container">
+                        <label style="font-size:13px; color:#cbd5e1;">Senha de Acesso:</label>
+                        <input type="password" name="nova_senha" class="admin-input-field" placeholder="Digite a senha" required>
+                    </div>
 
-                <div style="display:flex; flex-direction:column; gap:5px;">
-                    <label style="font-size:13px; color:#cbd5e1;">Cargo / Nível:</label>
-                    <select name="role" class="admin-input-field" style="min-width: 150px;">
-                        <option value="user">Operador Comum</option>
-                        <option value="admin">Administrador</option>
-                    </select>
+                    <div class="admin-input-container">
+                        <label style="font-size:13px; color:#cbd5e1;">Cargo / Nível:</label>
+                        <select name="role" class="admin-input-field" style="min-width: 170px;">
+                            <option value="user">Operador Comum</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
                 </div>
 
                 <button type="submit" class="admin-btn-submit">Criar Conta</button>
             </form>
         </div>
 
-        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1e293b;">Gerenciamento de Usuários do Sistema</h3>
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1e293b; text-align: center;">Gerenciamento de Usuários do Sistema</h3>
         <div class="admin-table-container">
             <table class="admin-custom-table">
                 <thead>
@@ -188,10 +218,10 @@
                                 <input type="hidden" name="usuario_alvo" value="{{ user.login }}">
                                 {% if user.status == 'ativo' %}
                                     <input type="hidden" name="action" value="suspender">
-                                    <button type="submit" class="admin-btn-submit" style="background-color: #dc2626 !important; padding: 6px 12px !important;">🚫 Suspender</button>
+                                    <button type="submit" class="admin-btn-submit" style="background-color: #dc2626 !important; padding: 6px 12px !important; margin-top: 0;">🚫 Suspender</button>
                                 {% else %}
                                     <input type="hidden" name="action" value="reativar">
-                                    <button type="submit" class="admin-btn-submit" style="background-color: #16a34a !important; padding: 6px 12px !important;">✔ Reativar</button>
+                                    <button type="submit" class="admin-btn-submit" style="background-color: #16a34a !important; padding: 6px 12px !important; margin-top: 0;">✔ Reativar</button>
                                 {% endif %}
                             </form>
                         </td>
@@ -201,7 +231,7 @@
             </table>
         </div>
 
-        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1e293b;">📋 Histórico Recente de Logs Auditáveis</h3>
+        <h3 style="font-size: 18px; margin-bottom: 12px; color: #1e293b; text-align: center;">📋 Histórico Recente de Logs Auditáveis</h3>
         <div class="admin-table-container admin-logs-scroll">
             <table class="admin-custom-table">
                 <thead style="position: sticky; top: 0; z-index: 5;">
