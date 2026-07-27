@@ -24,13 +24,31 @@ def limpar_texto(texto):
     texto_limpo = texto_sem_acento.strip().lower()
     return texto_limpo.capitalize()
 
+def checar_bloqueio():
+    """Valida se o usuário logado teve a conta suspensa em tempo real"""
+    if 'logged_in' in session and session.get('usuario'):
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute("SELECT status FROM usuarios WHERE login = %s", (session['usuario'],))
+        usr = cursor.fetchone()
+        if usr and usr.get('status') != 'ativo':
+            session.clear()
+            flash("Sua conta encontra-se suspensa/bloqueada pelo administrador.")
+            return False
+    return True
+
 def gerar_proximo_id(area):
     prefixos = {'Geral': '0', 'Mecânica': '1', 'Elétrica': '2'}
     prefixo = prefixos.get(area, '0')
     
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT id_produto FROM estoque WHERE id_produto LIKE %s ORDER BY id_produto ASC", (prefixo + '%',))
-    ids_existentes = [int(row['id_produto']) for row in cursor.fetchall()]
+    
+    ids_existentes = []
+    for row in cursor.fetchall():
+        try:
+            ids_existentes.append(int(row['id_produto']))
+        except ValueError:
+            continue
     
     inicio_sequencia = int(prefixo + "0001")
     proximo_numero = inicio_sequencia
@@ -75,7 +93,7 @@ def logout():
 @app.route('/lobby', methods=['GET'])
 @app.route('/lobby/<area_filtro>', methods=['GET'])
 def lobby(area_filtro='Todos'):
-    if 'logged_in' not in session:
+    if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
     termo_pesquisa = request.args.get('pesquisa', '').strip()
@@ -113,9 +131,10 @@ def lobby(area_filtro='Todos'):
     sugestoes = cursor.fetchall()
     
     return render_template('lobby.html', estoque=itens_estoque, area_atual=area_filtro, sugestoes=sugestoes, termo_pesquisa=termo_pesquisa, ordem_atual=ordem_preco)
+
 @app.route('/api/obter_link_imagem/<id_produto>')
 def obter_link_imagem(id_produto):
-    if 'logged_in' not in session:
+    if 'logged_in' not in session or not checar_bloqueio():
         return jsonify({'error': 'Não autorizado'}), 401
     
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -125,7 +144,7 @@ def obter_link_imagem(id_produto):
 
 @app.route('/insercao', methods=['GET', 'POST'])
 def insercao():
-    if 'logged_in' not in session:
+    if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -133,8 +152,17 @@ def insercao():
     if request.method == 'POST':
         nome = limpar_texto(request.form['nome'])
         area = request.form['area']
-        quantidade = int(request.form['quantidade'])
-        preco = float(request.form['preco'].replace(',', '.'))
+        
+        try:
+            quantidade = int(request.form['quantidade'])
+        except (ValueError, KeyError):
+            quantidade = 1
+            
+        try:
+            preco = float(str(request.form['preco']).replace(',', '.'))
+        except (ValueError, KeyError):
+            preco = 0.0
+            
         descricao = limpar_texto(request.form.get('descricao', ''))
         link_imagem = request.form.get('link_imagem', None)
         
@@ -167,14 +195,18 @@ def insercao():
 
 @app.route('/retirada', methods=['GET', 'POST'])
 def retirada():
-    if 'logged_in' not in session:
+    if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
     if request.method == 'POST':
         nome_selecionado = request.form['nome']
-        quantidade_retirar = int(request.form['quantidade'])
+        
+        try:
+            quantidade_retirar = int(request.form['quantidade'])
+        except (ValueError, KeyError):
+            quantidade_retirar = 1
         
         cursor.execute("SELECT * FROM estoque WHERE nome = %s AND quantidade >= %s", (nome_selecionado, quantidade_retirar))
         produto = cursor.fetchone()
@@ -200,7 +232,7 @@ def retirada():
 
 @app.route('/editar/<id_produto>', methods=['GET', 'POST'])
 def editar(id_produto):
-    if 'logged_in' not in session:
+    if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -211,20 +243,30 @@ def editar(id_produto):
         if botao_acao == 'excluir':
             cursor.execute("SELECT nome FROM estoque WHERE id_produto = %s", (id_produto,))
             prod = cursor.fetchone()
-            cursor.execute("DELETE FROM estoque WHERE id_produto = %s", (id_produto,))
-            cursor.execute("""
-                INSERT INTO historico_logs (usuario, acao, detalhe)
-                VALUES (%s, 'Exclusão', %s)
-            """, (session['usuario'], f"Apagado o produto {prod['nome']} (ID: {id_produto}) permanentemente."))
-            mysql.connection.commit()
-            flash("Produto removido definitivamente do estoque.", "success")
+            if prod:
+                cursor.execute("DELETE FROM estoque WHERE id_produto = %s", (id_produto,))
+                cursor.execute("""
+                    INSERT INTO historico_logs (usuario, acao, detalhe)
+                    VALUES (%s, 'Exclusão', %s)
+                """, (session['usuario'], f"Apagado o produto {prod['nome']} (ID: {id_produto}) permanentemente."))
+                mysql.connection.commit()
+                flash("Produto removido definitivamente do estoque.", "success")
             return redirect(url_for('lobby'))
             
         elif botao_acao == 'salvar':
             nome = limpar_texto(request.form['nome'])
             area = request.form['area']
-            quantidade = int(request.form['quantidade'])
-            preco = float(request.form['preco'].replace(',', '.'))
+            
+            try:
+                quantidade = int(request.form['quantidade'])
+            except (ValueError, KeyError):
+                quantidade = 0
+                
+            try:
+                preco = float(str(request.form['preco']).replace(',', '.'))
+            except (ValueError, KeyError):
+                preco = 0.0
+                
             descricao = limpar_texto(request.form.get('descricao', ''))
             link_imagem = request.form.get('link_imagem', None)
             
@@ -256,7 +298,7 @@ def editar(id_produto):
 
 @app.route('/admin_panel', methods=['GET', 'POST'])
 def admin_panel():
-    if 'logged_in' not in session or not session.get('is_admin'):
+    if 'logged_in' not in session or not session.get('is_admin') or not checar_bloqueio():
         flash("Acesso restrito apenas a administradores!")
         return redirect(url_for('lobby'))
         
