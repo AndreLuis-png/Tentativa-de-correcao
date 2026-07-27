@@ -336,10 +336,14 @@ def admin_panel():
                 
         elif action == 'alterar_chave':
             nova_chave = request.form['nova_chave'].strip()
-            cursor.execute("UPDATE config_admin SET chave_secundaria = %s WHERE id = 1", (nova_chave,))
-            cursor.execute("INSERT INTO historico_logs (usuario, acao, detalhe) VALUES (%s, 'Admin', 'Alterou a chave mecânica secundária')", (session['usuario'],))
-            mysql.connection.commit()
-            flash("Chave mecânica secundária atualizada com sucesso!", "success")
+            if nova_chave:
+                # Gera o hash Bcrypt da nova chave secundária
+                hashed_chave = bcrypt.hashpw(nova_chave.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
+                
+                cursor.execute("UPDATE config_admin SET chave_secundaria = %s WHERE id = 1", (hashed_chave,))
+                cursor.execute("INSERT INTO historico_logs (usuario, acao, detalhe) VALUES (%s, 'Admin', 'Alterou a chave mecânica secundária')", (session['usuario'],))
+                mysql.connection.commit()
+                flash("Chave mecânica secundária atualizada e criptografada com sucesso!", "success")
             
         return redirect(url_for('admin_panel'))
         
