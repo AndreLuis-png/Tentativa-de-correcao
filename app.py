@@ -9,12 +9,17 @@ import MySQLdb.cursors
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+# Configurações de Conexão com o Banco de Dados
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''  
 app.config['MYSQL_DB'] = 'almoxarifado_db'
 
 mysql = MySQL(app)
+
+# ==========================================
+# FUNÇÕES AUXILIARES E DE SEGURANÇA
+# ==========================================
 
 def limpar_texto(texto):
     if not texto:
@@ -36,6 +41,25 @@ def checar_bloqueio():
             return False
     return True
 
+def verificar_chave_secundaria(chave_digitada):
+    """Valida de forma segura o hash Bcrypt da chave mecânica secundária"""
+    if not chave_digitada:
+        return False
+        
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT chave_secundaria FROM config_admin WHERE id = 1")
+    reg = cursor.fetchone()
+    
+    if not reg or not reg.get('chave_secundaria'):
+        return False
+        
+    try:
+        hash_banco = reg['chave_secundaria'].encode('utf-8')
+        return bcrypt.checkpw(chave_digitada.encode('utf-8'), hash_banco)
+    except (ValueError, TypeError):
+        # Trata erros caso a chave no banco esteja em formato inválido
+        return False
+
 def gerar_proximo_id(area):
     prefixos = {'Geral': '0', 'Mecânica': '1', 'Elétrica': '2'}
     prefixo = prefixos.get(area, '0')
@@ -56,6 +80,10 @@ def gerar_proximo_id(area):
         proximo_numero += 1
         
     return f"{proximo_numero:05d}"
+
+# ==========================================
+# ROTAS PRINCIPAIS
+# ==========================================
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -293,7 +321,7 @@ def editar(id_produto):
     return render_template('editar.html', produto=produto, sugestoes=sugestoes)
 
 # ==========================================
-# ROTAS DO PAINEL ADMINISTRATIVO 
+# PAINEL ADMINISTRATIVO
 # ==========================================
 
 @app.route('/admin_panel', methods=['GET', 'POST'])
@@ -337,9 +365,7 @@ def admin_panel():
         elif action == 'alterar_chave':
             nova_chave = request.form['nova_chave'].strip()
             if nova_chave:
-                # Gera o hash Bcrypt da nova chave secundária
                 hashed_chave = bcrypt.hashpw(nova_chave.encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
-                
                 cursor.execute("UPDATE config_admin SET chave_secundaria = %s WHERE id = 1", (hashed_chave,))
                 cursor.execute("INSERT INTO historico_logs (usuario, acao, detalhe) VALUES (%s, 'Admin', 'Alterou a chave mecânica secundária')", (session['usuario'],))
                 mysql.connection.commit()
@@ -351,12 +377,14 @@ def admin_panel():
     lista_usuarios = cursor.fetchall()
     
     cursor.execute("SELECT chave_secundaria FROM config_admin WHERE id = 1")
-    chave_atual = cursor.fetchone()
+    reg_chave = cursor.fetchone()
+    # Verifica apenas se a chave existe sem enviar a hash para o template HTML
+    chave_configurada = bool(reg_chave and reg_chave.get('chave_secundaria'))
     
     cursor.execute("SELECT usuario, acao, detalhe, data_registro FROM historico_logs ORDER BY data_registro DESC LIMIT 100")
     lista_logs = cursor.fetchall()
     
-    return render_template('admin.html', usuarios=lista_usuarios, logs=lista_logs, chave_mecanica=chave_atual)
+    return render_template('admin.html', usuarios=lista_usuarios, logs=lista_logs, chave_configurada=chave_configurada)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
