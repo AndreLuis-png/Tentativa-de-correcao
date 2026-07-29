@@ -55,9 +55,9 @@ CREATE TABLE IF NOT EXISTS historico_logs (
 -- Hash Bcrypt gerado para a chave mecânica secundária padrão
 -- --------------------------------------------------------
 
---Antes era para fazer alterações como admin, mas não se usa mais
---INSERT INTO config_admin (chave_secundaria) 
---VALUES ('$2a$12$TyKbVE6G425lA7ko/IgwoOcR.Uc4RCbcvGj/ftZkopSNhhlelM8Zi'); #ROCAMBOLE
+-- Antes era para fazer alterações como admin, mas não se usa mais
+-- INSERT INTO config_admin (chave_secundaria) 
+-- VALUES ('$2a$12$TyKbVE6G425lA7ko/IgwoOcR.Uc4RCbcvGj/ftZkopSNhhlelM8Zi'); #ROCAMBOLE
 
 -- --------------------------------------------------------
 -- Inserções Iniciais: Usuários Padrão (Senhas com Bcrypt)
