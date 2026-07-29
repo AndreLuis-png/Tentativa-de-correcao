@@ -4,9 +4,16 @@
     <link rel="icon" type="image/jpg" href="/static/çenay.jpg">
     <meta charset="UTF-8">
     <title>Entrada de Material</title>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <style>
+        /* ==========================================
+           ESTILOS LOCAIS
+           ========================================== */
         input[type="text"], textarea, datalist option {
+            /* Impede que o navegador ou o CSS global force o texto a ficar todo em maiúsculo/minúsculo, 
+               preservando exatamente o que o usuário digita no campo de texto e na lista de sugestões */
             text-transform: none !important;
         }
     </style>
@@ -15,13 +22,16 @@
     <header>
         <h1>Painel do Almoxarifado</h1>
         <p>Operador: <strong>{{ session['usuario'] }}</strong></p>
+        
         <nav>
             <a href="{{ url_for('lobby') }}">🔎 Consultar Estoque</a> 
             <a href="{{ url_for('insercao') }}" class="active">📥 Entrada de Material</a> 
             <a href="{{ url_for('retirada') }}">📤 Saída / Baixa</a> 
+            
             {% if session['is_admin'] %}
                 <a href="{{ url_for('admin_panel') }}" style="color:#f87171;">🛠️ Administração</a>
             {% endif %}
+            
             <a href="{{ url_for('logout') }}" style="margin-left: auto; background: rgba(239,68,68,0.2);">Sair</a>
         </nav>
     </header>
@@ -30,6 +40,7 @@
         <h2>Registo / Entrada de Equipamento</h2>
         
         <form method="POST">
+            
             <label>Nome do Equipamento / Objeto:</label>
             <input type="text" id="campo-item-insercao" name="nome" required placeholder="Digite ID, Nome ou Preço..." autocomplete="off">
             <small style="color: #64748b; display:block; margin-top: 2px; margin-bottom: 10px;">💡 O sistema removerá acentos e deixará apenas a primeira letra em maiúscula automaticamente.</small>
@@ -64,30 +75,40 @@
     </div>
 
     <script>
+    // Captura os elementos HTML necessários para manipular a lista de sugestões
     const inputProduto = document.getElementById('campo-item-insercao');
     const datalist = document.getElementById('produtos-existentes');
+    // Salva todas as opções originais em um array para poder filtrá-las depois sem perder dados
     const opcoesOriginais = Array.from(datalist.options);
 
-    // Vincula o datalist dinamicamente apenas quando o usuário interage
+    // Adiciona o atributo 'list' ao input apenas quando o usuário clica nele.
+    // Isso evita problemas de performance ou carregamentos desnecessários em listas muito grandes.
     inputProduto.addEventListener('focus', function() {
         this.setAttribute('list', 'produtos-existentes');
     });
 
-    // Escuta a digitação para filtrar mantendo a ordem dos caracteres
+    // Evento disparado toda vez que o usuário digita ou apaga algo no campo
     inputProduto.addEventListener('input', function() {
         const termo = this.value.toLowerCase();
         
-        // Se o usuário selecionou uma opção completa da lista, extrai apenas o Nome puro
+        // Verifica se o texto atual do input é exatamente igual a uma das opções completas (ID | Nome | Preço)
+        // Isso acontece quando o usuário clica em uma das sugestões da lista.
         const opcaoSelecionada = opcoesOriginais.find(o => o.value === this.value);
+        
         if (opcaoSelecionada) {
+            // Se clicou na sugestão, substitui o texto longo apenas pelo 'nome' puro (armazenado no data-nome)
             this.value = opcaoSelecionada.getAttribute('data-nome');
-            this.blur(); // Remove o foco para fechar a caixinha do datalist
-            return;
+            this.blur(); // Remove o foco do campo para esconder a caixinha de sugestões do navegador
+            return; // Encerra a função aqui
         }
 
+        // Se o usuário ainda está digitando, limpa a lista atual...
         datalist.innerHTML = '';
+        
+        // ...e refaz a lista apenas com as opções que contêm o texto digitado
         opcoesOriginais.forEach(opcao => {
             if (opcao.value.toLowerCase().includes(termo)) {
+                // Adiciona um clone do elemento original de volta à lista visível
                 datalist.appendChild(opcao.cloneNode(true));
             }
         });

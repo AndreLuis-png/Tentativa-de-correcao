@@ -4,11 +4,21 @@
     <link rel="icon" type="image/jpg" href="/static/çenay.jpg">
     <meta charset="UTF-8">
     <title>Editar Material</title>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <style>
+        /* ==========================================
+           ESTILOS ESPECÍFICOS DESTA PÁGINA
+           ========================================== */
+           
         input[type="text"], textarea, datalist option {
+            /* Remove qualquer transformação automática de texto (como forçar tudo para maiúsculo) 
+               garantindo que o texto apareça exatamente como o usuário digitou */
             text-transform: none !important;
         }
+
+        /* Estilização específica para o botão/link de cancelar (cor cinza) */
         .btn-cancelar-cinza {
             background-color: #64748b !important;
             color: white !important;
@@ -18,13 +28,15 @@
             font-size: 15px;
             font-weight: bold;
             cursor: pointer;
-            text-decoration: none;
+            text-decoration: none; /* Remove o sublinhado padrão de links */
             text-align: center;
-            display: block;
+            display: block; /* Faz o link se comportar como um bloco, ocupando a largura disponível */
             margin-top: 10px;
-            transition: background 0.2s;
+            transition: background 0.2s; /* Suaviza a mudança de cor no hover */
         }
+
         .btn-cancelar-cinza:hover {
+            /* Escurece levemente o fundo cinza quando o usuário passa o mouse */
             background-color: #475569 !important;
         }
     </style>
@@ -33,13 +45,16 @@
     <header>
         <h1>Painel do Almoxarifado</h1>
         <p>Operador: <strong>{{ session['usuario'] }}</strong></p>
+        
         <nav>
             <a href="{{ url_for('lobby') }}">🔎 Consultar Estoque</a> 
             <a href="{{ url_for('insercao') }}">📥 Entrada de Material</a> 
             <a href="{{ url_for('retirada') }}">📤 Saída / Baixa</a> 
+            
             {% if session['is_admin'] %}
                 <a href="{{ url_for('admin_panel') }}" style="color:#f87171;">🛠️ Administração</a>
             {% endif %}
+            
             <a href="{{ url_for('logout') }}" style="margin-left: auto; background: rgba(239,68,68,0.2);">Sair</a>
         </nav>
     </header>
@@ -48,8 +63,10 @@
         <h2>Editar Propriedades do Material (ID: {{ produto.id_produto }})</h2>
         
         <form method="POST">
+            
             <label>Nome do Produto:</label>
             <input type="text" name="nome" value="{{ produto.nome }}" list="produtos-existentes" required autocomplete="off">
+            
             <datalist id="produtos-existentes">
                 {% for item in sugestoes %}
                     <option value="{{ item.nome }}">ID: {{ item.id_produto }} | R$ {{ "%.2f"|format(item.preco) }}</option>
@@ -76,7 +93,9 @@
             <input type="url" name="link_imagem" value="{{ produto.link_imagem if produto.link_imagem else '' }}" placeholder="https://exemplo.com/imagem.jpg">
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
+                
                 <button type="submit" name="botao_acao" value="salvar" style="flex: 1; background-color: #0284c7;">Salvar Alterações</button>
+                
                 {% if session['is_admin'] %}
                     <button type="submit" name="botao_acao" value="excluir" style="flex: 1; background-color: #dc2626;" onclick="return confirm('Tem certeza absoluta que deseja deletar este item do estoque permanentemente?')">Deletar Produto</button>
                 {% endif %}

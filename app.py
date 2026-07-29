@@ -23,6 +23,11 @@ mysql = MySQL(app)
 # ==========================================
 
 def limpar_texto(texto):
+    """
+    Remove acentuações, caracteres especiais de combinação e espaços em branco desnecessários.
+    Converte o texto todo para minúsculo e, por fim, capitaliza apenas a primeira letra.
+    Ideal para padronizar nomes de produtos e evitar duplicatas por erro de digitação.
+    """
     if not texto:
         return ""
     nfkd_form = unicodedata.normalize('NFKD', texto)
@@ -31,7 +36,11 @@ def limpar_texto(texto):
     return texto_limpo.capitalize()
 
 def checar_bloqueio():
-    """Valida se o usuário logado teve a conta suspensa em tempo real"""
+    """
+    Valida se o usuário logado teve a conta suspensa em tempo real.
+    Consulta o banco de dados e, se o status do usuário não for 'ativo',
+    limpa a sessão (desloga) e avisa que a conta foi bloqueada.
+    """
     if 'logged_in' in session and session.get('usuario'):
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT status FROM usuarios WHERE login = %s", (session['usuario'],))
@@ -43,7 +52,11 @@ def checar_bloqueio():
     return True
 
 def verificar_chave_secundaria(chave_digitada):
-    """Valida de forma segura o hash Bcrypt da chave mecânica secundária"""
+    """
+    Valida de forma segura o hash Bcrypt da chave mecânica secundária.
+    Pega a chave digitada pelo usuário, busca a hash correspondente no banco (ID = 1 na config_admin)
+    e compara utilizando a função de checagem do Bcrypt para evitar vazamento de senhas em texto puro.
+    """
     if not chave_digitada:
         return False
         
@@ -62,6 +75,11 @@ def verificar_chave_secundaria(chave_digitada):
         return False
 
 def gerar_proximo_id(area):
+    """
+    Gera um novo ID de produto (formato de 5 dígitos) baseado na área/categoria do item.
+    Atribui um prefixo ('0' Geral, '1' Mecânica, '2' Elétrica) e busca os IDs já existentes
+    para encontrar o próximo número livre na sequência, evitando colisões de ID.
+    """
     prefixos = {'Geral': '0', 'Mecânica': '1', 'Elétrica': '2'}
     prefixo = prefixos.get(area, '0')
     
@@ -88,6 +106,12 @@ def gerar_proximo_id(area):
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
+    """
+    Rota inicial de Autenticação.
+    Recebe login e senha do formulário, busca o usuário no banco de dados e verifica a 
+    autenticidade da senha usando Bcrypt. Se passar, cria variáveis de sessão (logged_in, usuario, is_admin)
+    e redireciona para o lobby; caso contrário, avisa do erro.
+    """
     if request.method == 'POST':
         usuario = request.form['usuario']
         senha = request.form['senha']
@@ -116,12 +140,21 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """
+    Rota para deslogar do sistema.
+    Limpa completamente os dados salvos no cookie de sessão e manda o usuário de volta pro login.
+    """
     session.clear()
     return redirect(url_for('login'))
 
 @app.route('/lobby', methods=['GET'])
 @app.route('/lobby/<area_filtro>', methods=['GET'])
 def lobby(area_filtro='Todos'):
+    """
+    Página principal do almoxarifado (Dashboard).
+    Lista todos os produtos do estoque. Permite filtrar os itens por área, 
+    pesquisar por texto (nome, ID ou preço) e ordenar o resultado de forma crescente/decrescente pelo preço.
+    """
     if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
@@ -163,6 +196,11 @@ def lobby(area_filtro='Todos'):
 
 @app.route('/api/obter_link_imagem/<id_produto>')
 def obter_link_imagem(id_produto):
+    """
+    Endpoint de API (Backend).
+    Retorna no formato JSON a URL de mídia/imagem vinculada a um produto específico.
+    Geralmente chamado via JavaScript ou requisições assíncronas (AJAX).
+    """
     if 'logged_in' not in session or not checar_bloqueio():
         return jsonify({'error': 'Não autorizado'}), 401
     
@@ -173,6 +211,12 @@ def obter_link_imagem(id_produto):
 
 @app.route('/insercao', methods=['GET', 'POST'])
 def insercao():
+    """
+    Rota para Entrada/Cadastro de Materiais.
+    Se o produto já existir no banco (mesmo nome e área), ele apenas adiciona a nova quantidade 
+    ao estoque atual e atualiza o preço. Se não existir, gera um ID e cria um registro novo.
+    Salva uma entrada detalhada na tabela `historico_logs` auditar a ação.
+    """
     if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
@@ -224,6 +268,11 @@ def insercao():
 
 @app.route('/retirada', methods=['GET', 'POST'])
 def retirada():
+    """
+    Rota para Baixa/Retirada de Materiais.
+    Pega a quantidade que o usuário quer retirar, verifica se há estoque suficiente
+    no banco de dados e deduz essa quantidade. Também salva a ação na tabela de logs para auditoria.
+    """
     if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
@@ -261,6 +310,13 @@ def retirada():
 
 @app.route('/editar/<id_produto>', methods=['GET', 'POST'])
 def editar(id_produto):
+    """
+    Rota para Edição ou Exclusão de Produtos.
+    Processa dois botões (ações) diferentes: 
+    1. 'excluir' -> Apaga completamente o item do banco de dados.
+    2. 'salvar' -> Atualiza as colunas do banco com as novas informações fornecidas.
+    Ambas as ações criam um registro no histórico de logs.
+    """
     if 'logged_in' not in session or not checar_bloqueio():
         return redirect(url_for('login'))
         
@@ -327,6 +383,14 @@ def editar(id_produto):
 
 @app.route('/admin_panel', methods=['GET', 'POST'])
 def admin_panel():
+    """
+    Rota de Administração do Sistema (Exclusiva para role 'admin').
+    Possui várias ferramentas centralizadas via parâmetro `action` no POST:
+    - 'create_user': Cria uma nova conta com uma senha cifrada com bcrypt.
+    - 'suspender' / 'reativar': Muda o status da conta de um usuário (impedindo-o de logar).
+    - 'alterar_chave': Atualiza a chave de segurança administrativa criptografando-a.
+    Na requisição GET padrão, também exibe listas de usuários e o histórico recente do sistema.
+    """
     if 'logged_in' not in session or not session.get('is_admin') or not checar_bloqueio():
         flash("Acesso restrito apenas a administradores!")
         return redirect(url_for('lobby'))

@@ -1,33 +1,40 @@
+/* ==========================================
+   VARIÁVEIS GLOBAIS (DESIGN SYSTEM)
+   ========================================== */
 :root {
-    /* Cores Principais */
+    /* Cores Principais: Definem a identidade visual da aplicação (Azul, Laranja, Branco e Cinza) */
     --primary-blue: #192A6B;
     --accent-orange: #FF9500;
     --pure-white: #FFFFFF;
     --gray-muted: #9BA2B0;
 
-    /* Cores de Fundo Secundárias e Variações Escuras */
+    /* Cores de Fundo Secundárias e Variações Escuras: Usadas no fundo da página, cartões e bordas */
     --bg-main: #f1f5f9;
     --bg-card: var(--pure-white);
     --border-color: #cbd5e1;
     
-    /* Variações de Tons Escuros (Filtros e Painéis) */
+    /* Variações de Tons Escuros (Filtros e Painéis): Usadas para diferenciar seções como painel admin ou barra de busca */
     --dark-blue-gray: #19436B;
     --deep-purple: #23196B;
     --teal-dark: #195D6B;
     --plum-dark: #3E196B;
 
-    /* Tons de Alerta, Categorias e Destaques (Amarelos/Laranjas) */
+    /* Tons de Alerta, Categorias e Destaques (Amarelos/Laranjas): Usados principalmente nas "badges" (etiquetas) das áreas */
     --orange-bright: #FF6800;
     --yellow-gold: #FFB400;
     --yellow-bright: #FFD200;
     --yellow-light: #FFD262;
     
-    /* Cores de Estado Funcional */
+    /* Cores de Estado Funcional: Verde para sucesso, Vermelho para erro/perigo */
     --error: #ef4444;
     --success: #22c55e;
 }
 
+/* ==========================================
+   ESTILOS BASE DA PÁGINA
+   ========================================== */
 body {
+    /* Reseta margens e define a fonte padrão do sistema, além do fundo cinza claro */
     font-family: 'Segoe UI', system-ui, sans-serif;
     background-color: var(--bg-main);
     color: var(--primary-blue);
@@ -35,6 +42,7 @@ body {
     padding: 0;
 }
 
+/* Container principal que centraliza o conteúdo na tela, limitando a largura máxima e criando um visual de "cartão" com sombra */
 .container {
     width: 90%;
     max-width: 1200px;
@@ -46,7 +54,11 @@ body {
     border: 1px solid var(--border-color);
 }
 
+/* ==========================================
+   CABEÇALHO E NAVEGAÇÃO
+   ========================================== */
 header {
+    /* Barra superior do sistema */
     background-color: var(--primary-blue);
     color: var(--pure-white);
     padding: 20px 5%;
@@ -69,12 +81,14 @@ header strong {
     color: var(--accent-orange);
 }
 
+/* Navegação em linha (menus horizontais) */
 nav { 
     display: flex; 
     gap: 12px; 
     flex-wrap: wrap; 
 }
 
+/* Estilo dos links do menu principal (botões transparentes por padrão) */
 nav a {
     color: var(--pure-white);
     text-decoration: none;
@@ -86,13 +100,18 @@ nav a {
     background: rgba(255, 255, 255, 0.08);
 }
 
+/* Efeito ao passar o mouse ou página ativa no menu (fica laranja) */
 nav a:hover, nav a.active { 
     background: var(--accent-orange); 
     color: var(--primary-blue);
     font-weight: 600;
 }
 
+/* ==========================================
+   FILTROS, FORMULÁRIOS E INPUTS
+   ========================================== */
 .filter-bar {
+    /* Barra escura usada para pesquisa de itens ou filtros */
     background: var(--dark-blue-gray);
     padding: 15px;
     border-radius: 6px;
@@ -117,6 +136,7 @@ label {
     color: var(--primary-blue); 
 }
 
+/* Estilo geral para todos os campos de entrada de dados */
 input, select, textarea {
     padding: 10px;
     border: 2px solid var(--gray-muted);
@@ -127,12 +147,16 @@ input, select, textarea {
     color: var(--primary-blue);
 }
 
+/* Destaque (outline) quando o usuário clica dentro de um campo de formulário */
 input:focus, select:focus, textarea:focus {
     outline: none; 
     border-color: var(--accent-orange); 
     box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.25);
 }
 
+/* ==========================================
+   BOTÕES (PRIMÁRIOS E SECUNDÁRIOS)
+   ========================================== */
 button, .btn {
     background: var(--accent-orange);
     color: var(--primary-blue);
@@ -152,6 +176,7 @@ button:hover, .btn:hover {
     color: var(--pure-white);
 }
 
+/* Botão secundário (normalmente para cancelar ou voltar), fundo transparente com borda */
 .btn-secondary { 
     background: transparent; 
     color: var(--primary-blue); 
@@ -164,6 +189,9 @@ button:hover, .btn:hover {
     color: var(--primary-blue);
 }
 
+/* ==========================================
+   TABELAS E BADGES (ETIQUETAS)
+   ========================================== */
 table { 
     width: 100%; 
     border-collapse: collapse; 
@@ -184,6 +212,7 @@ th {
     letter-spacing: 0.5px; 
 }
 
+/* Estilização para o ID do produto ou códigos que aparecem dentro da tabela */
 td code {
     background: #e2e8f0;
     padding: 4px 6px;
@@ -196,6 +225,7 @@ tr:hover {
     background: rgba(25, 42, 107, 0.03); 
 }
 
+/* Badges: Tags visuais para categorizar itens (Geral, Elétrica, Mecânica) */
 .badge { 
     padding: 6px 12px; 
     border-radius: 12px; 
@@ -224,6 +254,9 @@ tr:hover {
     color: var(--error);
 }
 
+/* ==========================================
+   MENSAGENS DO SISTEMA (FLASH MESSAGES)
+   ========================================== */
 .flash-message { 
     padding: 12px; 
     border-radius: 6px; 
@@ -242,7 +275,11 @@ tr:hover {
     border: 1px solid #86efac; 
 }
 
+/* ==========================================
+   PÁGINA DE LOGIN (EXCLUSIVO)
+   ========================================== */
 .login-body { 
+    /* Centraliza o form de login perfeitamente no meio da tela */
     display: flex; 
     justify-content: center; 
     align-items: center; 
@@ -268,6 +305,9 @@ tr:hover {
     margin-bottom: 25px;
 }
 
+/* ==========================================
+   PAINEL ADMINISTRATIVO
+   ========================================== */
 .admin-header {
     background-color: var(--primary-blue) !important;
 }
@@ -279,6 +319,7 @@ tr:hover {
     background-color: var(--plum-dark);
 }
 
+/* Grid para dividir as seções do painel admin (ex: Gestão de Usuários vs Configurações) em duas colunas */
 .admin-grid-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -286,6 +327,7 @@ tr:hover {
     margin-top: 20px;
 }
 
+/* Responsividade: transforma o painel admin em 1 coluna em telas menores (tablets/celulares) */
 @media (max-width: 900px) {
     .admin-grid-layout {
         grid-template-columns: 1fr;
@@ -339,6 +381,7 @@ tr:hover {
     margin-top: 15px;
 }
 
+/* Botões coloridos para ações de admin (Azul, Laranja, Vermelho) */
 .btn-admin-blue {
     background: #2563eb; 
     color: white; 
@@ -373,7 +416,11 @@ tr:hover {
     opacity: 0.9;
 }
 
+/* ==========================================
+   CAIXA DE LOGS (HISTÓRICO)
+   ========================================== */
 .logs-scroll-box {
+    /* Define uma altura máxima e adiciona barra de rolagem para os logs não quebrarem a página */
     max-height: 620px;
     overflow-y: auto;
     padding-right: 10px;
@@ -387,6 +434,7 @@ tr:hover {
     border-bottom: 1px solid #f1f5f9;
     font-size: 13px;
 }
+/* Faz as linhas da tabela/lista de logs alternarem de cor levemente para melhor leitura (efeito zebra) */
 .log-item-line:nth-child(even) {
     background: #f8fafc;
 }
@@ -403,10 +451,15 @@ tr:hover {
     font-weight: 500;
 }
 
+/* ==========================================
+   EFEITOS VISUAIS E ANIMAÇÕES
+   ========================================== */
 .container-imagem-oculta img {
+    /* Transição suave (efeito bounce) para a imagem ao passar o mouse */
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 2px solid var(--accent-orange);
 }
 .container-imagem-oculta img:hover {
+    /* Aumenta a imagem levemente quando o cursor está em cima (zoom/scale) */
     transform: scale(1.03);
 }

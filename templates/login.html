@@ -4,9 +4,11 @@
     <link rel="icon" type="image/jpg" href="/static/çenay.jpg">
     <meta charset="UTF-8">
     <title>Login - Almoxarifado</title>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="login-body">
+
     <div class="container login-card">
         <h2 style="margin-top:0;">Autenticação</h2>
         
@@ -17,6 +19,7 @@
         {% endwith %}
 
         <form method="POST">
+            
             <label>Utilizador:</label>
             <input type="text" name="usuario" required autocomplete="off">
             
@@ -26,5 +29,6 @@
             <button type="submit" style="margin-top: 10px;">Entrar no Sistema</button>
         </form>
     </div>
+
 </body>
 </html>

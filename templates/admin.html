@@ -6,15 +6,24 @@
     <title>Painel Administrativo - Seguro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
+        /* ==========================================
+           CONTAINER PRINCIPAL
+           ========================================== */
         #admin-page-wrapper {
+            /* Define a fonte, limita a largura para telas grandes e centraliza na página */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
             margin: 30px auto;
             padding: 20px;
             color: #334155;
-            box-sizing: border-box;
+            box-sizing: border-box; /* Garante que o padding não aumente o tamanho total do elemento */
         }
+
+        /* ==========================================
+           TÍTULOS E CABEÇALHOS DE SEÇÃO
+           ========================================== */
         .admin-section-title {
+            /* Estilo para o título principal da página (tamanho, negrito, centralização e linha inferior) */
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 25px;
@@ -23,8 +32,12 @@
             padding-bottom: 8px;
             text-align: center;
         }
-        /* Card de Cadastro Centralizado */
+
+        /* ==========================================
+           CARD DE CADASTRO DE USUÁRIOS
+           ========================================== */
         .admin-card-cadastro {
+            /* Cria uma caixa de destaque azul centralizada, com cantos arredondados e sombra */
             background: #192A6B !important;
             color: white !important;
             padding: 30px;
@@ -35,22 +48,31 @@
             text-align: center;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: center; /* Centraliza os itens internos horizontalmente */
         }
+        
         .admin-card-cadastro h3 {
+            /* Ajustes de margem e tamanho para o título dentro do card azul */
             margin-top: 0;
             margin-bottom: 20px;
             font-size: 20px;
             font-weight: 600;
             width: 100%;
         }
+
+        /* ==========================================
+           FORMULÁRIOS E CAMPOS DE ENTRADA (INPUTS)
+           ========================================== */
         .admin-card-cadastro form {
+            /* Faz com que o formulário ocupe toda a largura disponível no card e alinhe os itens em coluna */
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         .admin-form-group {
+            /* Organiza os campos de input lado a lado (em linha) e quebra a linha se a tela for pequena (flex-wrap) */
             display: flex;
             gap: 20px;
             align-items: center;
@@ -58,14 +80,18 @@
             flex-wrap: wrap;
             width: 100%;
         }
+
         .admin-input-container {
+            /* Empilha o rótulo (label) e o campo de texto (input) verticalmente */
             display: flex;
             flex-direction: column;
             gap: 6px;
             align-items: center;
             justify-content: center;
         }
+
         .admin-input-field {
+            /* Estilo dos campos de texto/senha (borda, fundo, espaçamento interno e remoção de transformações de texto) */
             padding: 10px 14px !important;
             border-radius: 6px !important;
             border: 1px solid #cbd5e1 !important;
@@ -76,7 +102,12 @@
             text-align: center !important;
             box-sizing: border-box;
         }
+
+        /* ==========================================
+           BOTÃO DE ENVIO / SUBMIT
+           ========================================== */
         .admin-btn-submit {
+            /* Estilo padrão do botão de ação primária (azul claro, cantos arredondados, margem no topo) */
             background-color: #0284c7 !important;
             color: white !important;
             border: none !important;
@@ -84,16 +115,22 @@
             border-radius: 6px !important;
             font-weight: bold !important;
             cursor: pointer !important;
-            transition: all 0.2s ease;
+            transition: all 0.2s ease; /* Animação suave para o efeito de hover */
             margin-top: 20px;
             align-self: center;
         }
+
         .admin-btn-submit:hover {
+            /* Efeito ao passar o mouse: escurece levemente o fundo e levanta o botão em 1px */
             background-color: #0369a1 !important;
             transform: translateY(-1px);
         }
-        /* Tabelas */
+
+        /* ==========================================
+           TABELAS DE DADOS (USUÁRIOS E LOGS)
+           ========================================== */
         .admin-table-container {
+            /* Contêiner em volta das tabelas para criar uma borda arredondada e esconder o que vazar (overflow) */
             border: 1px solid #cbd5e1 !important;
             border-radius: 8px !important;
             overflow: hidden !important;
@@ -101,45 +138,67 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
             background: white !important;
         }
+
         .admin-custom-table {
+            /* Faz a tabela ocupar 100% da caixa e colapsa as bordas para um visual mais limpo */
             width: 100% !important;
             border-collapse: collapse !important;
             margin: 0 !important;
             text-align: center !important;
         }
+
         .admin-custom-table th {
+            /* Cabeçalho da tabela (fundo escuro, texto branco) */
             background: #334155 !important;
             color: white !important;
             padding: 14px !important;
             font-weight: 600 !important;
             font-size: 14px !important;
         }
+
         .admin-custom-table td {
+            /* Células da tabela (espaçamento, borda inferior fina e cor do texto) */
             padding: 12px 14px !important;
             border-bottom: 1px solid #e2e8f0 !important;
             font-size: 14px !important;
             color: #334155 !important;
             text-transform: none !important;
         }
+
         .admin-custom-table tr:hover {
+            /* Destaca a linha inteira da tabela ao passar o cursor por cima */
             background-color: #f8fafc !important;
         }
+
+        /* ==========================================
+           BADGES DE STATUS (ATIVO / SUSPENSO)
+           ========================================== */
         .admin-status-badge {
+            /* Formato base de etiqueta (cápsula arredondada) para mostrar os status */
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: bold;
             display: inline-block;
         }
+
         .status-cor-ativo { 
+            /* Esquema de cor Verde (fundo claro, texto escuro) para usuários ativos */
             background-color: #dcfce7 !important; 
             color: #15803d !important; 
         }
+
         .status-cor-bloqueado { 
+            /* Esquema de cor Vermelha (fundo claro, texto escuro) para usuários suspensos */
             background-color: #fee2e2 !important; 
             color: #b91c1c !important; 
         }
+
+        /* ==========================================
+           SCROLL PARA O HISTÓRICO DE LOGS
+           ========================================== */
         .admin-logs-scroll {
+            /* Limita a altura da tabela de logs e cria uma barra de rolagem vertical apenas para ela */
             max-height: 400px !important;
             overflow-y: auto !important;
         }

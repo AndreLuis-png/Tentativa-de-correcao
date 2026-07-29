@@ -4,43 +4,63 @@
     <link rel="icon" type="image/jpg" href="/static/çenay.jpg">
     <meta charset="UTF-8">
     <title>Consulta de Estoque</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <style>
-        /* FIXA A PÁGINA: Remove a barra de rolagem do extremo direito do navegador */
+        /* ============================================================
+           1. ESTRUTURA GLOBAL E FIXAÇÃO DE TELA (NO-SCROLL EXTERNO)
+           ============================================================ */
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow-y: hidden; /* Força o navegador a sumir com a barra lateral direita */
+            overflow-y: hidden; /* Oculta a barra de rolagem principal da página */
         }
 
-        /* Estrutura interna para acomodar o cabeçalho fixo e o container */
+        /* Organiza a página como um container Flexbox vertical */
         body {
             display: flex;
             flex-direction: column;
         }
 
         .container {
-            flex: 1;
+            flex: 1; /* Ocupa todo o espaço vertical disponível abaixo do header */
             display: flex;
             flex-direction: column;
             max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
             box-sizing: border-box;
-            overflow: hidden; /* Evita que o container vaze */
+            overflow: hidden; /* Impede transbordamento de elementos internos */
         }
 
-        /* MANUTENÇÃO DA ROLAGEM INTERNA DA TABELA */
+        /* ============================================================
+           2. TABELA COM ROLAGEM INTERNA E CABEÇALHO FIXO
+           ============================================================ */
         .tabela-responsiva {
-            flex: 1;
-            overflow-y: auto; /* Mantém a barra de rolagem apenas aqui dentro da tabela */
+            flex: 1; /* Preenche a área vertical interna restante */
+            overflow-y: auto; /* Adiciona barra de rolagem dedicada exclusivamente à tabela */
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
 
+        /* Torna o cabeçalho da tabela (TH) fixo no topo ao rolar os dados */
+        .tabela-responsiva th {
+            position: sticky;
+            top: 0;
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+            z-index: 1;
+            padding: 12px;
+            text-align: left;
+        }
+
+        /* ============================================================
+           3. ESTILIZAÇÃO DE COMPONENTES E BOTÕES DE AÇÃO
+           ============================================================ */
         .btn-editar-laranja {
             background-color: #f97316 !important;
             color: white !important;
@@ -54,6 +74,7 @@
         .btn-editar-laranja:hover {
             background-color: #ea580c !important;
         }
+
         .btn-visualizar-azul {
             background-color: #0284c7 !important;
             color: white !important;
@@ -69,9 +90,13 @@
         .btn-visualizar-azul:hover {
             background-color: #0369a1 !important;
         }
+
+        /* Garante preservação de caixa original das letras nas células */
         table td {
             text-transform: none !important;
         }
+
+        /* Container inicialmente oculto que abrigará a imagem do produto */
         .container-imagem-oculta {
             display: none; 
             margin-top: 8px; 
@@ -79,15 +104,6 @@
             padding: 6px; 
             border-radius: 8px; 
             border: 1px solid #475569;
-        }
-        .tabela-responsiva th {
-            position: sticky;
-            top: 0;
-            background-color: #1e293b !important;
-            color: #ffffff !important;
-            z-index: 1;
-            padding: 12px;
-            text-align: left;
         }
     </style>
 </head>
@@ -99,19 +115,23 @@
             <a href="{{ url_for('lobby') }}" class="active">🔎 Consultar Estoque</a> 
             <a href="{{ url_for('insercao') }}">📥 Entrada de Material</a> 
             <a href="{{ url_for('retirada') }}">📤 Saída / Baixa</a> 
+            
             {% if session['is_admin'] %}
                 <a href="{{ url_for('admin_panel') }}" style="color:#f87171;">🛠️ Administração</a>
             {% endif %}
+            
             <a href="{{ url_for('logout') }}" style="margin-left: auto; background: rgba(239,68,68,0.2);">Sair</a>
         </nav>
     </header>
 
     <div class="container">
+        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 20px;">
             <h2 style="margin: 0;">Visão Geral do Estoque</h2>
             
             <form method="GET" action="{{ url_for('lobby', area_filtro=area_atual) }}" style="display: flex; gap: 5px; max-width: 750px; flex: 1; transform: translateY(17px);">
                 <input type="text" id="campo-pesquisa-lobby" name="pesquisa" list="produtos-pesquisa" value="{{ termo_pesquisa }}" placeholder="🔎 Buscar por ID, Nome ou Preço..." autocomplete="off" style="flex: 2; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; text-transform: none;">
+                
                 <datalist id="produtos-pesquisa">
                     {% for item in sugestoes %}
                         <option value="{{ item.nome }}">ID: {{ item.id_produto }} | R$ {{ "%.2f"|format(item.preco) }}</option>
@@ -174,12 +194,14 @@
                             <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
                                 <div style="display: flex; gap: 8px;">
                                     <a href="{{ url_for('editar', id_produto=item.id_produto) }}" class="btn-editar-laranja">Editar</a>
+                                    
                                     {% if item.possui_imagem == 1 %}
                                         <button class="btn-visualizar-azul" onclick="carregarEVisualizarImagem('{{ item.id_produto }}')">Visualizar</button>
                                     {% else %}
                                         <span style="color:#64748b; font-size: 12px; font-style: italic; align-self: center;">Sem imagem</span>
                                     {% endif %}
                                 </div>
+                                
                                 <div id="box-img-{{ item.id_produto }}" class="container-imagem-oculta">
                                     <img id="tag-img-{{ item.id_produto }}" src="" style="width:300px; height:300px; object-fit: cover; border-radius: 6px; display: block;" alt="Carregando...">
                                 </div>
@@ -197,16 +219,23 @@
     </div>
 
     <script>
+    /* ------------------------------------------------------------------
+       1. FILTRAGEM INSTANTÂNEA DA TABELA NO LADO DO CLIENTE
+       ------------------------------------------------------------------ */
     document.getElementById('campo-pesquisa-lobby').addEventListener('input', function() {
         const termo = this.value.toLowerCase().trim();
         const linhas = document.querySelectorAll('#tabela-produtos-corpo tr');
 
         linhas.forEach(linha => {
+            // Pula verificação se a linha for a mensagem "Nenhum produto encontrado"
             if (linha.cells.length < 5) return;
+            
+            // Captura o texto das colunas: ID (0), Nome (1) e Preço (4)
             const id = linha.cells[0] ? linha.cells[0].textContent.toLowerCase() : '';
             const nome = linha.cells[1] ? linha.cells[1].textContent.toLowerCase() : '';
             const preco = linha.cells[4] ? linha.cells[4].textContent.toLowerCase() : '';
 
+            // Oculta ou exibe a linha baseado na correspondência com o termo digitado
             if (id.includes(termo) || nome.includes(termo) || preco.includes(termo)) {
                 linha.style.display = "";
             } else {
@@ -215,20 +244,26 @@
         });
     });
 
+    /* ------------------------------------------------------------------
+       2. CARREGAMENTO ASSÍNCRONO DA IMAGEM DO ITEM (API FETCH)
+       ------------------------------------------------------------------ */
     function carregarEVisualizarImagem(idProduto) {
         const box = document.getElementById('box-img-' + idProduto);
         const img = document.getElementById('tag-img-' + idProduto);
 
+        // Se o container já estiver aberto, funciona como botão Toggle para fechar
         if (box.style.display === "block") {
             box.style.display = "none";
             return;
         }
 
+        // Se a imagem já foi carregada anteriormente, apenas reexibe a box
         if (img.src && img.src !== window.location.href) {
             box.style.display = "block";
             return;
         }
 
+        // Requisição AJAX/Fetch para a API do Backend
         fetch('/api/obter_link_imagem/' + idProduto)
             .then(response => response.json())
             .then(data => {

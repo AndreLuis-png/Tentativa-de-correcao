@@ -4,8 +4,11 @@
     <link rel="icon" type="image/jpg" href="/static/çenay.jpg">
     <meta charset="UTF-8">
     <title>Saída / Baixa de Material</title>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <style>
+        /* Preserva a caixa de texto (maiúsculas/minúsculas) exatamente como o usuário digita no input e na lista */
         input[type="text"], datalist option {
             text-transform: none !important;
         }
@@ -15,13 +18,16 @@
     <header>
         <h1>Painel do Almoxarifado</h1>
         <p>Operador: <strong>{{ session['usuario'] }}</strong></p>
+        
         <nav>
             <a href="{{ url_for('lobby') }}">🔎 Consultar Estoque</a> 
             <a href="{{ url_for('insercao') }}">📥 Entrada de Material</a> 
             <a href="{{ url_for('retirada') }}" class="active">📤 Saída / Baixa</a> 
+            
             {% if session['is_admin'] %}
                 <a href="{{ url_for('admin_panel') }}" style="color:#f87171;">🛠️ Administração</a>
             {% endif %}
+            
             <a href="{{ url_for('logout') }}" style="margin-left: auto; background: rgba(239,68,68,0.2);">Sair</a>
         </nav>
     </header>
@@ -30,6 +36,7 @@
         <h2>Registo de Saída / Baixa do Estoque</h2>
         
         <form method="POST">
+            
             <label>Digite ou Selecione o Item para Saída:</label>
             <input type="text" id="campo-item-retirada" name="nome" required placeholder="Digite ID, Nome ou Preço...">
             <small style="color: #64748b; display:block; margin-top: 2px; margin-bottom: 15px;">💡 Identifique por ID, Nome ou Preço na caixa de texto.</small>
@@ -48,24 +55,31 @@
     </div>
 
     <script>
+    // Captura dos elementos do DOM necessários para a interação
     const inputRetirada = document.getElementById('campo-item-retirada');
     const datalistRetirada = document.getElementById('produtos-existentes');
+    // Salva a lista original completa de opções para consulta e filtragem
     const opcoesOriginaisRetirada = Array.from(datalistRetirada.options);
 
+    // Conecta a lista de opções (list) ao input apenas quando o campo ganha foco
     inputRetirada.addEventListener('focus', function() {
         this.setAttribute('list', 'produtos-existentes');
     });
 
+    // Escuta eventos de digitação no campo para filtrar ou selecionar itens
     inputRetirada.addEventListener('input', function() {
         const termo = this.value.toLowerCase();
         
+        // Verifica se o valor inserido bate exatamente com uma das opções formatadas do datalist
         const opcaoSelecionada = opcoesOriginaisRetirada.find(o => o.value === this.value);
         if (opcaoSelecionada) {
+            // Extrai apenas o Nome puro do produto (armazenado em 'data-nome') e insere no campo
             this.value = opcaoSelecionada.getAttribute('data-nome');
-            this.blur();
+            this.blur(); // Remove o foco do campo para fechar o menu suspenso do navegador
             return;
         }
 
+        // Caso o usuário esteja digitando, filtra a lista exibindo apenas os itens correspondentes
         datalistRetirada.innerHTML = '';
         opcoesOriginaisRetirada.forEach(opcao => {
             if (opcao.value.toLowerCase().includes(termo)) {
