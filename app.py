@@ -1,4 +1,5 @@
 #pip install flask flask-mysqldb mysqlclient bcrypt  --Instalar antes de usar o código
+
 import os
 import re
 import unicodedata
@@ -6,8 +7,12 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_mysqldb import MySQL
 import bcrypt
 import MySQLdb.cursors
+from flask_cors import CORS
+from rotasAPI.produtos_api import api_bp
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='rotasURL/templates', static_folder='rotasURL/static')
+CORS(app)  # Permite que o Expo Go acesse seu backend
+app.register_blueprint(api_bp)  # Registra as rotas da API no servidor
 app.secret_key = os.urandom(24)
 
 # Configurações de Conexão com o Banco de Dados
